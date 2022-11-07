@@ -4,6 +4,7 @@ local originalPlySendTouchData
 local enabled = CreateConVar( "express_enable_fpp", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Enable FPP Bindings" )
 
 local function enable()
+    if not FPP then return end
     if not enabled:GetBool() then return end
     originalPlySendTouchData = originalPlySendTouchData or FPP.plySendTouchData
 

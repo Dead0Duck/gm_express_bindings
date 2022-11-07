@@ -20,6 +20,7 @@ local function envOff()
 end
 
 local function enable()
+    if not AdvDupe2 then return end
     if not enabled:GetBool() then return end
 
     originalReceiver = originalReceiver or net.Receivers["AdvDupe2_ReceiveFile"]

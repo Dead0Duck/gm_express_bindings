@@ -4,6 +4,7 @@ local enabled = CreateConVar( "express_enable_adv2", "1", FCVAR_ARCHIVE + FCVAR_
 
 
 local function enable()
+    if not AdvDupe2 then return end
     if not enabled:GetBool() then return end
 
     originalSendToClient = originalSendToClient or AdvDupe2.SendToClient
