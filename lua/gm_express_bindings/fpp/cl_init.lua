@@ -46,4 +46,6 @@ cvars.AddChangeCallback( "express_enable_fpp", "setup_teardown", function( _, ol
     end
 end )
 
-hook.Add( "InitPostEntity", "Express_FPPBindings", begin )
+hook.Add( "InitPostEntity", "Express_FPPBindings", function()
+    if enabled:GetBool() then enable() end
+end )
