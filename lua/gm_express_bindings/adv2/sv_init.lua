@@ -1,5 +1,5 @@
-
 local originalSendToClient
+local originalFileReceiver
 local enabled = CreateConVar( "express_enable_adv2", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Enable AdvDupe2 Bindings" )
 
 
@@ -22,15 +22,32 @@ local function enable()
             cbPly.AdvDupe2.Downloading = false
         end )
     end
+
+
+    originalFileReceiver = originalFileReceiver or net.Receivers["AdvDupe2_ReceiveFile"]
+    net.Receivers["AdvDupe2_ReceiveFile"] = nil
+
+    express.Listen( "advdupe2_receivefile", function( data, ply )
+        if not IsValid( ply ) then return end
+
+        local name = data.name
+        local fileData = data.data
+
+        if not ply.AdvDupe2 then ply.AdvDupe2 = {} end
+        ply.AdvDupe2.Name = name
+
+        AdvDupe2.LoadDupe( ply, AdvDupe2.Decode( fileData ) )
+    end )
 end
 
 local function disable()
     if enabled:GetBool() then return end
 
     AdvDupe2.SendToClient = originalSendToClient
+    net.Receive( "AdvDupe2_ReceiveFile", originalFileReceiver )
 end
 
-cvars.AddChangeCallback( "express_enable_adv2", "setup_teardown", function( _, old, new )
+cvars.AddChangeCallback( "express_enable_adv2", function( _, old, new )
     if new == 0 and old ~= 0 then
         return disable()
     end
@@ -38,7 +55,7 @@ cvars.AddChangeCallback( "express_enable_adv2", "setup_teardown", function( _, o
     if new ~= 0 then
         return enable()
     end
-end )
+end, "setup_teardown" )
 
 hook.Add( "InitPostEntity", "Express_Adv2Bindings", function()
     if enabled:GetBool() then enable() end

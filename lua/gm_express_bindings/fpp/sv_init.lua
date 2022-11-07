@@ -1,4 +1,5 @@
 local rawget = rawget
+local table_insert = table.insert
 
 local originalPlySendTouchData
 local enabled = CreateConVar( "express_enable_fpp", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Enable FPP Bindings" )
@@ -19,18 +20,22 @@ local function enable()
         local reasons = rawget( constraintReasons and constraintReasons or ent.FPPCanTouchWhy, ply )
 
         table_insert( tbl, ent:EntIndex() )
-        table_insert( tbl, IsValid( owner ) and owner:EntIndex() or -1 )
+        table_insert( tbl, owner )
         table_insert( tbl, touchability )
         table_insert( tbl, reasons )
     end
 
     FPP.plySendTouchData = function( ply, ents )
+        if #ents < 300 then
+            return originalPlySendTouchData( ply, ents )
+        end
+
         local tbl = {}
         for i = 1, #ents do
             writeEntData( ply, rawget( ents, i ), tbl )
         end
 
-        express.Send( ply, "fpp_touchability_data", tbl )
+        express.Send( "fpp_touchability_data", tbl, ply )
     end
 end
 
@@ -39,7 +44,7 @@ local function disable()
     FPP.plySendTouchData = originalPlySendTouchData
 end
 
-cvars.AddChangeCallback( "express_enable_fpp", "setup_teardown", function( _, old, new )
+cvars.AddChangeCallback( "express_enable_fpp", function( _, old, new )
     if new == 0 and old ~= 0 then
         return disable()
     end
@@ -47,7 +52,7 @@ cvars.AddChangeCallback( "express_enable_fpp", "setup_teardown", function( _, ol
     if new ~= 0 then
         return enable()
     end
-end )
+end, "setup_teardown" )
 
 hook.Add( "InitPostEntity", "Express_FPPBindings", function()
     if enabled:GetBool() then enable() end
