@@ -29,14 +29,24 @@ local function enable()
 
     express.Listen( "advdupe2_receivefile", function( data, ply )
         if not IsValid( ply ) then return end
+        ply.AdvDupe2.Uploading = true
+        AdvDupe2.InitProgressBar( ply, "Opening: " )
 
         local name = data.name
         local fileData = data.data
+        print( "Received AdvDupe2 File: ", name, fileData )
 
         if not ply.AdvDupe2 then ply.AdvDupe2 = {} end
-        ply.AdvDupe2.Name = name
+
+        local _1, _2, _3 = string.find( name, "([%w_]+)" )
+        if _3 then
+            ply.AdvDupe2.Name = string.sub( _3, 1, 32 )
+        else
+            ply.AdvDupe2.Name = "Advanced Duplication"
+        end
 
         AdvDupe2.LoadDupe( ply, AdvDupe2.Decode( fileData ) )
+        ply.AdvDupe2.Uploading = false
     end )
 end
 
