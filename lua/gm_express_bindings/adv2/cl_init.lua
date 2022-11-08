@@ -17,8 +17,7 @@ local function envOn( data )
 end
 
 local function envOff()
-    local offEnv = getfenv( 0 )
-    setfenv( originalReceiver, offEnv )
+    setfenv( originalReceiver, getfenv( 0 ) )
 end
 
 local function enable()
@@ -26,9 +25,8 @@ local function enable()
     if not enabled:GetBool() then return end
 
     originalReceiver = originalReceiver or net.Receivers["AdvDupe2_ReceiveFile"]
-    net.Receivers["AdvDupe2_ReceiveFile"] = nil
 
-    express.Listen( "advdupe2_receivefile", function( data )
+    express.Receive( "advdupe2_receivefile", function( data )
         envOn( data )
         originalReceiver()
         envOff()
@@ -58,7 +56,10 @@ local function enable()
             }, nil, cb )
         end
 
-        pcall( originalUploadFile, ... )
+        local ok, err = pcall( originalUploadFile, ... )
+        if not ok then
+            print( "Error uploading file:", err )
+        end
 
         net.Start = start
         net.SendToServer = sendToServer
@@ -71,8 +72,8 @@ local function disable()
     if enabled:GetBool() then return end
 
     envOff()
-    net.Receive( "AdvDupe2_ReceiveFile", originalReceiver )
-    express.RemoveListener( "advdupe2_receivefile" )
+    AdvDupe2.UploadFile = originalUploadFile
+    express.Receive( "advdupe2_receivefile", nil )
 end
 
 cvars.AddChangeCallback( "express_enable_adv2", function( _, old, new )

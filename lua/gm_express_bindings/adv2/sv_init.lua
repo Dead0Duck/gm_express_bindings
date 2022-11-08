@@ -1,13 +1,11 @@
-local originalSendToClient
-local originalFileReceiver
+local ogSendToClient
 local enabled = CreateConVar( "express_enable_adv2", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Enable AdvDupe2 Bindings" )
-
 
 local function enable()
     if not AdvDupe2 then return end
     if not enabled:GetBool() then return end
 
-    originalSendToClient = originalSendToClient or AdvDupe2.SendToClient
+    ogSendToClient = ogSendToClient or AdvDupe2.SendToClient
     function AdvDupe2.SendToClient( ply, autoSave, data )
         if not IsValid( ply ) then return end
         ply.AdvDupe2.Downloading = true
@@ -23,11 +21,7 @@ local function enable()
         end )
     end
 
-
-    originalFileReceiver = originalFileReceiver or net.Receivers["AdvDupe2_ReceiveFile"]
-    net.Receivers["AdvDupe2_ReceiveFile"] = nil
-
-    express.Listen( "advdupe2_receivefile", function( data, ply )
+    express.Receive( "advdupe2_receivefile", function( ply, data )
         if not IsValid( ply ) then return end
         ply.AdvDupe2.Uploading = true
         AdvDupe2.InitProgressBar( ply, "Opening: " )
@@ -52,9 +46,7 @@ end
 
 local function disable()
     if enabled:GetBool() then return end
-
-    AdvDupe2.SendToClient = originalSendToClient
-    net.Receive( "AdvDupe2_ReceiveFile", originalFileReceiver )
+    AdvDupe2.SendToClient = ogSendToClient
 end
 
 cvars.AddChangeCallback( "express_enable_adv2", function( _, old, new )

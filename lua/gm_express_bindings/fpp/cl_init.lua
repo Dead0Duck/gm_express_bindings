@@ -9,7 +9,7 @@ local function enable()
     local entTouchabiiity = FPP.entTouchability
     local entTouchReasons = FPP.entTouchReasons
 
-    express.Listen( "fpp_touchability_data", function( data )
+    express.Receive( "fpp_touchability_data", function( data )
         local dataCount = #data
         for i = 1, dataCount, 4 do
             local ent = rawget( data, i )
@@ -27,7 +27,7 @@ end
 local function disable()
     if enabled:GetBool() then return end
 
-    express.RemoveListener( "fpp_touchability_data" )
+    express.Receive( "fpp_touchability_data", nil )
 end
 
 cvars.AddChangeCallback( "express_enable_fpp", function( _, old, new )
