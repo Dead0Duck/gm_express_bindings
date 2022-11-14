@@ -15,7 +15,7 @@ local function enable()
     originalDownloadReceiver = originalDownloadReceiver or net.Receivers["prop2mesh_download"]
     originalUploadReceiver = originalUploadReceiver or net.Receivers["prop2mesh_upload"]
 
-    local p2mMeta = scripted_ents.GetStored( "prop2mesh" ).t
+    local p2mMeta = scripted_ents.GetStored( "sent_prop2mesh" ).t
 
     originalEntSendControllers = originalEntSendControllers or p2mMeta.SendControllers
     p2mMeta.SendControllers = function( self, target )
@@ -36,7 +36,7 @@ local function enable()
     p2mMeta.BroadcastUpdate = function( self )
         self.prop2mesh_synctime = SysTime() .. ""
 
-        express.Broadcast( "prop2mesh_controller_sync", {
+        express.Broadcast( "prop2mesh_controller_update", {
             ent = self,
             syncTime = self.prop2mesh_synctime,
             updates = self.prop2mesh_updates

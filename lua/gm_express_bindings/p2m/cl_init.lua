@@ -8,7 +8,6 @@ end
 
 local function wrapUploadStartReceiver()
     local eid
-    local ent
     local objectCount
 
     local nextObj
@@ -66,6 +65,7 @@ local function wrapUploadStartReceiver()
 
                 -- The loop has completed, we can send the full dataset
                 if #objects == objectCount then
+                    print( "Uploading " .. objectCount .. " p2m objects to the server" )
                     express.Send( "prop2mesh_upload", {
                         eid = eid,
                         objects = objects
@@ -81,6 +81,33 @@ local function wrapUploadStartReceiver()
     } )
 
     setfenv( net.Receivers["prop2mesh_upload_start"], env )
+
+    express.Receive( "prop2mesh_controller_update", function( data )
+        local ent = data.ent
+        if not prop2mesh.isValid( ent ) then return end
+
+        local syncTime = data.syncTime
+        local updates = data.updates
+
+        prop2mesh.handleControllerUpdates( ent, syncTime, updates )
+    end )
+
+    express.Receive( "prop2mesh_controller_sync", function( data )
+        local ent = data.ent
+        if not prop2mesh.isValid( ent ) then return end
+
+        local syncTime = data.syncTime
+        local controllers = data.controllers
+
+        prop2mesh.discardControllers( ent, ent.prop2mesh_controllers )
+
+        ent.prop2mesh_synctime = syncTime
+        ent.prop2mesh_controllers = controllers
+        ent.prop2mesh_refresh = true
+        ent.prop2mesh_triggertool = true
+        ent.prop2mesh_triggereditor = prop2mesh.editor and true
+
+    end )
 end
 
 local function unwrapUploadStartReceiver()
