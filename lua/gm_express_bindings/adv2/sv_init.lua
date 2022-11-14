@@ -28,7 +28,6 @@ local function enable()
 
         local name = data.name
         local fileData = data.data
-        print( "Received AdvDupe2 File: ", name, fileData )
 
         if not ply.AdvDupe2 then ply.AdvDupe2 = {} end
 

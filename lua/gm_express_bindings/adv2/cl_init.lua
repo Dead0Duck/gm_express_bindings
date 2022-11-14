@@ -53,7 +53,7 @@ local function enable()
             express.Send( "advdupe2_receivefile", {
                 name = name,
                 data = fileData
-            }, nil, cb )
+            }, cb )
         end
 
         local ok, err = pcall( originalUploadFile, ... )
