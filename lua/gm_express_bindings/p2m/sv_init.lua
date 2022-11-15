@@ -1,6 +1,5 @@
 local enabled = CreateConVar( "express_enable_p2m", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Enable Prop2Mesh Bindings" )
 
-local originalWriteStream
 local originalDownloadReceiver
 local originalUploadReceiver
 
@@ -11,46 +10,140 @@ local function enable()
     if not prop2mesh then return end
     if not enabled:GetBool() then return end
 
-    originalWriteStream = originalWriteStream or prop2mesh.WriteStream
     originalDownloadReceiver = originalDownloadReceiver or net.Receivers["prop2mesh_download"]
     originalUploadReceiver = originalUploadReceiver or net.Receivers["prop2mesh_upload"]
+    originalSendDownload = originalSendDownload or prop2mesh.sendDownload
+
+    -- prop2mesh_download
+
+    local pendingSendDownloads = {}
+
+    prop2mesh.sendDownload = function( ply, ent, crc )
+        pendingSendDownloads[ply] = pendingSendDownloads[ply] or {}
+        table.insert( pendingSendDownloads[ply], { ent, crc } )
+        timer.Start( "express_p2m_send_download" )
+    end
+
+    timer.Create( "express_p2m_send_download", 1, 1, function()
+        for ply, downloads in pairs( pendingSendDownloads ) do
+            local downloadObjects = {}
+
+            for _, download in ipairs( downloads ) do
+                local ent, crc = unpack( download )
+                table.insert( downloadObjects, { crc = crc, partData = ent.prop2mesh_partlists[crc] } )
+            end
+
+            express.Send( "prop2mesh_download", downloadObjects, ply )
+        end
+
+        pendingSendDownloads = {}
+    end )
+    timer.Stop( "express_p2m_send_download" )
 
     local p2mMeta = scripted_ents.GetStored( "sent_prop2mesh" ).t
 
-    originalEntSendControllers = originalEntSendControllers or p2mMeta.SendControllers
-    p2mMeta.SendControllers = function( self, target )
-        local data = {
-            ent = self,
-            syncTime = self.prop2mesh_synctime,
-            controllers = self.prop2mesh_controllers
-        }
+    -- EntSendControllers
 
+    originalEntSendControllers = originalEntSendControllers or p2mMeta.SendControllers
+
+    local pendingBroadcastSyncs = {}
+    local pendingTargetSyncs = {}
+    p2mMeta.SendControllers = function( ent, target )
         if target then
-            express.Send( "prop2mesh_controller_sync", data, target )
+            table.insert( { ent = ent, target = target }, pendingTargetSyncs )
         else
-            express.Broadcast( "prop2mesh_controller_sync", data )
+            pendingBroadcastSyncs[ent] = true
         end
+
+        timer.Start( "express_p2m_send_sync" )
     end
+
+    timer.Create( "express_p2m_send_sync", 1, 1, function()
+        print( "Running express_p2m_send_sync" )
+        local syncs = {}
+
+        print( "Broadcasting " .. table.Count( pendingBroadcastSyncs ) .. " p2m syncs" )
+        for ent in pairs( pendingBroadcastSyncs ) do
+            if IsValid( ent ) then
+                local data = {
+                    ent = ent,
+                    syncTime = ent.prop2mesh_synctime,
+                    controllers = ent.prop2mesh_controllers
+                }
+
+                table.insert( syncs, data )
+            end
+        end
+        pendingBroadcastSyncs = {}
+
+        if #syncs > 0 then
+            express.Broadcast( "prop2mesh_controller_sync", syncs )
+        end
+
+        print( "Sending " .. #pendingTargetSyncs .. " p2m syncs" )
+        for _, sync in ipairs( pendingTargetSyncs ) do
+            local ent = sync.ent
+            local target = sync.target
+
+            if IsValid( ent ) then
+                local data = {
+                    ent = ent,
+                    syncTime = ent.prop2mesh_synctime,
+                    controllers = ent.prop2mesh_controllers
+                }
+
+                express.Send( "prop2mesh_controller_sync", data, target )
+            end
+        end
+        pendingTargetSyncs = {}
+    end )
+    timer.Stop( "express_p2m_send_sync" )
+
+    --
+    -- Ent Broadcast Update
 
     originalEntBroadcastUpdate = originalEntBroadcastUpdate or p2mMeta.BroadcastUpdate
-    p2mMeta.BroadcastUpdate = function( self )
-        self.prop2mesh_synctime = SysTime() .. ""
 
-        express.Broadcast( "prop2mesh_controller_update", {
-            ent = self,
-            syncTime = self.prop2mesh_synctime,
-            updates = self.prop2mesh_updates
-        } )
-
-        self.prop2mesh_updates = nil
+    local pendingUpdates = {}
+    p2mMeta.BroadcastUpdate = function( ent )
+        ent.prop2mesh_synctime = SysTime() .. ""
+        pendingUpdates[ent] = true
+        timer.Start( "express_p2m_broadcast_updates" )
     end
+
+    timer.Create( "express_p2m_broadcast_updates", 1, 1, function()
+        local updates = {}
+        print( "Broadcasting " .. table.Count( pendingUpdates ) .. " p2m updates" )
+        for ent in pairs( pendingUpdates ) do
+            if IsValid( ent ) then
+                local data = {
+                    ent = ent,
+                    syncTime = ent.prop2mesh_synctime,
+                    updates = ent.prop2mesh_updates
+                }
+
+                table.insert( updates, data )
+                ent.prop2mesh_updates = nil
+            end
+
+            pendingUpdates[ent] = nil
+        end
+
+        if #updates == 0 then return end
+        express.Broadcast( "prop2mesh_controller_update", updates )
+    end )
+    timer.Stop( "express_p2m_broadcast_updates" )
+
 
     for _, ent in ipairs( ents.FindByClass( "prop2mesh" ) ) do
         ent.SendControllers = p2mMeta.SendControllers
         ent.BroadcastUpdate = p2mMeta.BroadcastUpdate
     end
 
+    -- Upload
+
     express.Receive( "prop2mesh_upload", function( ply, data )
+        print( SysTime(), "Received prop2mesh_upload from", ply )
         local ent = Entity( data.eid )
         if not prop2mesh.canUpload( ply, ent ) then return end
 
@@ -69,6 +162,8 @@ local function disable()
         ent.SendControllers = originalEntSendControllers
         ent.BroadcastUpdate = originalEntBroadcastUpdate
     end
+
+    prop2mesh.sendDownload = originalSendDownload
 end
 
 cvars.AddChangeCallback( "express_enable_p2m", function( _, _, new )

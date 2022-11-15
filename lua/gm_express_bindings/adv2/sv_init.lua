@@ -16,12 +16,15 @@ local function enable()
             data = data
         }
 
+        print( SysTime(), "Running SendToClient, sending advdupe2_receivefile" )
         express.Send( "advdupe2_receivefile", sendData, ply, function( cbPly )
+            print( SysTime(), "advdupe2_receivefile callback for", cbPly )
             cbPly.AdvDupe2.Downloading = false
         end )
     end
 
     express.Receive( "advdupe2_receivefile", function( ply, data )
+        print( SysTime(), "Received advdupe2_receivefile from", ply )
         if not IsValid( ply ) then return end
         ply.AdvDupe2.Uploading = true
         AdvDupe2.InitProgressBar( ply, "Opening: " )
