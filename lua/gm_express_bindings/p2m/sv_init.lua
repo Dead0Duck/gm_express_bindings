@@ -14,6 +14,7 @@ local function enable()
     originalUploadReceiver = originalUploadReceiver or net.Receivers["prop2mesh_upload"]
     originalSendDownload = originalSendDownload or prop2mesh.sendDownload
 
+
     -- prop2mesh_download
 
     local pendingSendDownloads = {}
@@ -24,7 +25,7 @@ local function enable()
         timer.Start( "express_p2m_send_download" )
     end
 
-    timer.Create( "express_p2m_send_download", 1, 1, function()
+    timer.Create( "express_p2m_send_download", 1, 0, function()
         for ply, downloads in pairs( pendingSendDownloads ) do
             local downloadObjects = {}
 
@@ -39,9 +40,9 @@ local function enable()
         pendingSendDownloads = {}
         timer.Stop( "express_p2m_send_download" )
     end )
-    timer.Stop( "express_p2m_send_download" )
 
     local p2mMeta = scripted_ents.GetStored( "sent_prop2mesh" ).t
+
 
     -- EntSendControllers
 
@@ -59,7 +60,7 @@ local function enable()
         timer.Start( "express_p2m_send_sync" )
     end
 
-    timer.Create( "express_p2m_send_sync", 1, 1, function()
+    timer.Create( "express_p2m_send_sync", 1, 0, function()
         print( "Running express_p2m_send_sync" )
         local syncs = {}
 
@@ -100,9 +101,8 @@ local function enable()
 
         timer.Stop( "express_p2m_send_sync" )
     end )
-    timer.Stop( "express_p2m_send_sync" )
 
-    --
+
     -- Ent Broadcast Update
 
     originalEntBroadcastUpdate = originalEntBroadcastUpdate or p2mMeta.BroadcastUpdate
@@ -114,7 +114,7 @@ local function enable()
         timer.Start( "express_p2m_broadcast_updates" )
     end
 
-    timer.Create( "express_p2m_broadcast_updates", 1, 1, function()
+    timer.Create( "express_p2m_broadcast_updates", 1, 0, function()
         local updates = {}
         print( "Broadcasting " .. table.Count( pendingUpdates ) .. " p2m updates" )
         for ent in pairs( pendingUpdates ) do
@@ -137,13 +137,12 @@ local function enable()
 
         timer.Stop( "express_p2m_broadcast_updates" )
     end )
-    timer.Stop( "express_p2m_broadcast_updates" )
-
 
     for _, ent in ipairs( ents.FindByClass( "prop2mesh" ) ) do
         ent.SendControllers = p2mMeta.SendControllers
         ent.BroadcastUpdate = p2mMeta.BroadcastUpdate
     end
+
 
     -- Upload
 
