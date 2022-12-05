@@ -10,8 +10,12 @@ if SERVER then
 
     include( "p2m/sv_init.lua" )
     AddCSLuaFile( "p2m/cl_init.lua" )
+
+    include( "glib/sv_init.lua" )
+    AddCSLuaFile( "glib/cl_init.lua" )
 else
     include( "fpp/cl_init.lua" )
     include( "adv2/cl_init.lua" )
     include( "p2m/cl_init.lua" )
+    include( "glib/cl_init.lua" )
 end
