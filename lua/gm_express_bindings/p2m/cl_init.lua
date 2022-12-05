@@ -84,37 +84,37 @@ local function wrapUploadStartReceiver()
 end
 
 local function setupReceivers()
-    express.Receive( "prop2mesh_controller_update", function( allUpdates )
-        print( "Received " .. #allUpdates .. " p2m controller updates" )
-        for _, data in ipairs( allUpdates ) do
-            local ent = data.ent
-            if not prop2mesh.isValid( ent ) then return end
+    -- express.Receive( "prop2mesh_controller_update", function( allUpdates )
+    --     print( "Received " .. #allUpdates .. " p2m controller updates" )
+    --     for _, data in ipairs( allUpdates ) do
+    --         local ent = data.ent
+    --         if not prop2mesh.isValid( ent ) then return end
 
-            local syncTime = data.syncTime
-            local updates = data.updates
+    --         local syncTime = data.syncTime
+    --         local updates = data.updates
 
-            prop2mesh.handleControllerUpdates( ent, syncTime, updates )
-        end
-    end )
+    --         prop2mesh.handleControllerUpdates( ent, syncTime, updates )
+    --     end
+    -- end )
 
-    express.Receive( "prop2mesh_controller_sync", function( syncs )
-        print( "Received " .. #syncs .. " p2m controller syncs" )
-        for _, data in ipairs( syncs ) do
-            local ent = data.ent
-            if not prop2mesh.isValid( ent ) then return end
+    -- express.Receive( "prop2mesh_controller_sync", function( syncs )
+    --     print( "Received " .. #syncs .. " p2m controller syncs" )
+    --     for _, data in ipairs( syncs ) do
+    --         local ent = data.ent
+    --         if not prop2mesh.isValid( ent ) then return end
 
-            local syncTime = data.syncTime
-            local controllers = data.controllers
+    --         local syncTime = data.syncTime
+    --         local controllers = data.controllers
 
-            prop2mesh.discardControllers( ent, ent.prop2mesh_controllers )
+    --         prop2mesh.discardControllers( ent, ent.prop2mesh_controllers )
 
-            ent.prop2mesh_synctime = syncTime
-            ent.prop2mesh_controllers = controllers
-            ent.prop2mesh_refresh = true
-            ent.prop2mesh_triggertool = true
-            ent.prop2mesh_triggereditor = prop2mesh.editor and true
-        end
-    end )
+    --         ent.prop2mesh_synctime = syncTime
+    --         ent.prop2mesh_controllers = controllers
+    --         ent.prop2mesh_refresh = true
+    --         ent.prop2mesh_triggertool = true
+    --         ent.prop2mesh_triggereditor = prop2mesh.editor and true
+    --     end
+    -- end )
 
     express.Receive( "prop2mesh_download", function( objects )
         prop2mesh.downloads = prop2mesh.downloads + #objects
