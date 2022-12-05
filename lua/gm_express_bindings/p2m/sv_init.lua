@@ -6,6 +6,9 @@ local originalUploadReceiver
 local originalEntSendControllers
 local originalEntBroadcastUpdate
 
+local SysTime = SysTime
+local table_Count = table.Count
+
 local function enable()
     if not prop2mesh then return end
     if not enabled:GetBool() then return end
@@ -25,7 +28,7 @@ local function enable()
         timer.Start( "express_p2m_send_download" )
     end
 
-    timer.Create( "express_p2m_send_download", 1, 0, function()
+    timer.Create( "express_p2m_send_download", 0.25, 0, function()
         for ply, downloads in pairs( pendingSendDownloads ) do
             local downloadObjects = {}
 
@@ -61,11 +64,11 @@ local function enable()
         timer.Start( "express_p2m_send_sync" )
     end
 
-    timer.Create( "express_p2m_send_sync", 1, 0, function()
+    timer.Create( "express_p2m_send_sync", 0.15, 0, function()
         print( "Running express_p2m_send_sync" )
         local syncs = {}
 
-        print( "Broadcasting " .. table.Count( pendingBroadcastSyncs ) .. " p2m syncs" )
+        print( "Broadcasting " .. table_Count( pendingBroadcastSyncs ) .. " p2m syncs" )
         for ent in pairs( pendingBroadcastSyncs ) do
             if IsValid( ent ) then
                 local data = {
@@ -110,15 +113,10 @@ local function enable()
     originalEntBroadcastUpdate = originalEntBroadcastUpdate or p2mMeta.BroadcastUpdate
 
     local pendingUpdates = {}
-    p2mMeta.BroadcastUpdate = function( ent )
-        ent.prop2mesh_synctime = SysTime() .. ""
-        pendingUpdates[ent] = true
-        timer.Start( "express_p2m_broadcast_updates" )
-    end
 
-    timer.Create( "express_p2m_broadcast_updates", 1, 0, function()
+    local function processPendingUpdates()
         local updates = {}
-        print( "Broadcasting " .. table.Count( pendingUpdates ) .. " p2m updates" )
+        print( "Broadcasting " .. table_Count( pendingUpdates ) .. " p2m updates" )
         for ent in pairs( pendingUpdates ) do
             if IsValid( ent ) then
                 local data = {
@@ -139,14 +137,34 @@ local function enable()
         end
 
         timer.Stop( "express_p2m_broadcast_updates" )
-    end )
+    end
+
+    p2mMeta.BroadcastUpdate = function( ent )
+        -- You already told us you have an update
+        if pendingUpdates[ent] then return end
+
+        pendingUpdates[ent] = true
+        ent.prop2mesh_synctime = SysTime() .. ""
+
+        -- If there are too many queued updates
+        if table_Count( pendingUpdates ) >= 20 then
+            timer.Stop( "express_p2m_broadcast_updates" )
+            pendingUpdates[ent] = true
+            processPendingUpdates()
+            return
+        end
+
+        -- Otherwise restart the window for bulking
+        timer.Start( "express_p2m_broadcast_updates" )
+    end
+
+    timer.Create( "express_p2m_broadcast_updates", 0.15, 0, processPendingUpdates )
     timer.Stop( "express_p2m_broadcast_updates" )
 
-    for _, ent in ipairs( ents.FindByClass( "prop2mesh" ) ) do
+    for _, ent in ipairs( ents.FindByClass( "sent_prop2mesh" ) ) do
         ent.SendControllers = p2mMeta.SendControllers
         ent.BroadcastUpdate = p2mMeta.BroadcastUpdate
     end
-
 
     -- Upload
 
@@ -166,7 +184,7 @@ local function disable()
     if not prop2mesh then return end
     if enabled:GetBool() then return end
 
-    for _, ent in ipairs( ents.FindByClass( "prop2mesh" ) ) do
+    for _, ent in ipairs( ents.FindByClass( "sent_prop2mesh" ) ) do
         ent.SendControllers = originalEntSendControllers
         ent.BroadcastUpdate = originalEntBroadcastUpdate
     end
