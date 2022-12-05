@@ -40,6 +40,7 @@ local function enable()
         pendingSendDownloads = {}
         timer.Stop( "express_p2m_send_download" )
     end )
+    timer.Stop( "express_p2m_send_download" )
 
     local p2mMeta = scripted_ents.GetStored( "sent_prop2mesh" ).t
 
@@ -101,6 +102,7 @@ local function enable()
 
         timer.Stop( "express_p2m_send_sync" )
     end )
+    timer.Stop( "express_p2m_send_sync" )
 
 
     -- Ent Broadcast Update
@@ -132,11 +134,13 @@ local function enable()
             pendingUpdates[ent] = nil
         end
 
-        if #updates == 0 then return end
-        express.Broadcast( "prop2mesh_controller_update", updates )
+        if #updates > 0 then
+            express.Broadcast( "prop2mesh_controller_update", updates )
+        end
 
         timer.Stop( "express_p2m_broadcast_updates" )
     end )
+    timer.Stop( "express_p2m_broadcast_updates" )
 
     for _, ent in ipairs( ents.FindByClass( "prop2mesh" ) ) do
         ent.SendControllers = p2mMeta.SendControllers
