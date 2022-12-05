@@ -37,6 +37,7 @@ local function enable()
         end
 
         pendingSendDownloads = {}
+        timer.Stop( "express_p2m_send_download" )
     end )
     timer.Stop( "express_p2m_send_download" )
 
@@ -96,6 +97,8 @@ local function enable()
             end
         end
         pendingTargetSyncs = {}
+
+        timer.Stop( "express_p2m_send_sync" )
     end )
     timer.Stop( "express_p2m_send_sync" )
 
@@ -131,6 +134,8 @@ local function enable()
 
         if #updates == 0 then return end
         express.Broadcast( "prop2mesh_controller_update", updates )
+
+        timer.Stop( "express_p2m_broadcast_updates" )
     end )
     timer.Stop( "express_p2m_broadcast_updates" )
 
