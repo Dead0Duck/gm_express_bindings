@@ -24,7 +24,7 @@ local function enable()
     if not AdvDupe2 then return end
     if not enabled:GetBool() then return end
 
-    originalReceiver = originalReceiver or net.Receivers["AdvDupe2_ReceiveFile"]
+    originalReceiver = originalReceiver or net.Receivers["advdupe2_receivefile"]
 
     express.Receive( "advdupe2_receivefile", function( data )
         envOn( data )
