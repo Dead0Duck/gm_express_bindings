@@ -12,7 +12,12 @@ local function envOn( data )
             ReadStream = function( _, cb )
                 cb( data.data )
             end
-        }
+        },
+        file = file,
+        string = string,
+        AdvDupe2 = AdvDupe2,
+        NOTIFY_ERROR = NOTIFY_ERROR,
+        LocalPlayer = LocalPlayer,
     } )
 end
 
