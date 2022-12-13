@@ -6,7 +6,7 @@ local function enable()
     if not enabled:GetBool() then return end
 
     ogSendToClient = ogSendToClient or AdvDupe2.SendToClient
-    function AdvDupe2.SendToClient( ply, autoSave, data )
+    function AdvDupe2.SendToClient( ply, data, autoSave )
         if not IsValid( ply ) then return end
         ply.AdvDupe2.Downloading = true
         AdvDupe2.InitProgressBar( ply, "Saving:" )
