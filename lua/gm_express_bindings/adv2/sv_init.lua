@@ -43,6 +43,7 @@ local function enable()
 
         AdvDupe2.LoadDupe( ply, AdvDupe2.Decode( fileData ) )
         ply.AdvDupe2.Uploading = false
+        AdvDupe2.RemoveProgressBar( ply )
     end )
 end
 
