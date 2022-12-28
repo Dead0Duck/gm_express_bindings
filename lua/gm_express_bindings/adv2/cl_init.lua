@@ -55,10 +55,15 @@ local function enable()
         end
 
         net.WriteStream = function( fileData, cb )
+            local callback = function( ... )
+                AdvDupe2.RemoveProgressBar()
+                cb( ... )
+            end
+
             express.Send( "advdupe2_receivefile", {
                 name = name,
                 data = fileData
-            }, cb )
+            }, callback )
         end
 
         local ok, err = pcall( originalUploadFile, ... )
