@@ -1,17 +1,12 @@
 local enabled = CreateConVar( "express_enable_p2m", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Enable Prop2Mesh Bindings" )
 
-local originalDownloadReceiver
-local originalUploadReceiver
+local originalSendDownload
 
 local function enable()
     if not prop2mesh then return end
     if not enabled:GetBool() then return end
 
     originalSendDownload = originalSendDownload or prop2mesh.sendDownload
-    originalUploadReceiver = originalUploadReceiver or net.Receivers["prop2mesh_upload"]
-    originalDownloadReceiver = originalDownloadReceiver or net.Receivers["prop2mesh_download"]
-
-    -- prop2mesh_download
 
     local pendingSendDownloads = {}
 
