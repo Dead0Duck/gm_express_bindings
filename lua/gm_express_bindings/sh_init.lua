@@ -2,6 +2,7 @@ AddCSLuaFile()
 
 -- TODO: Make a proper loader
 if SERVER then
+    require( "playerload" )
     include( "fpp/sv_init.lua" )
     AddCSLuaFile( "fpp/cl_init.lua" )
 

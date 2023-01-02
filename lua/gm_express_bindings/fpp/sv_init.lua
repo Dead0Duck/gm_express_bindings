@@ -26,6 +26,9 @@ local function enable()
     end
 
     FPP.plySendTouchData = function( ply, ents )
+        -- Technically this breaks out before <300 ents, but that's correct too
+        if not ply.Express_CanReceiveFPP then return end
+
         if #ents < 300 then
             return originalPlySendTouchData( ply, ents )
         end
@@ -53,6 +56,10 @@ cvars.AddChangeCallback( "express_enable_fpp", function( _, old, new )
         return enable()
     end
 end, "setup_teardown" )
+
+hook.Add( "PlayerFullLoad", "Express_FPPBindings", function( ply )
+    ply.Express_CanReceiveFPP = true
+end )
 
 hook.Add( "InitPostEntity", "Express_FPPBindings", function()
     if enabled:GetBool() then enable() end
