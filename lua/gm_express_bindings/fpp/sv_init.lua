@@ -14,9 +14,11 @@ local function enable()
         local owner = IsValid( cppiOwner ) and cppiOwner:EntIndex() or -1
 
         local restrictConstraint = ent.FPPRestrictConstraint or ent.FPPCanTouch
+        if not restrictConstraint then return end
         local touchability = rawget( restrictConstraint, ply ) or ""
 
         local constraintReasons = ent.FPPConstraintReasons or ent.FPPCanTouchWhy
+        if not constraintReasons then return end
         local reasons = rawget( constraintReasons, ply ) or ""
 
         table_insert( tbl, ent:EntIndex() )
