@@ -2,6 +2,7 @@ local rawget = rawget
 local table_insert = table.insert
 
 local originalPlySendTouchData
+local empty = {}
 local enabled = CreateConVar( "express_enable_fpp", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Enable FPP Bindings" )
 
 local function enable()
@@ -13,12 +14,10 @@ local function enable()
         local cppiOwner = ent:CPPIGetOwner()
         local owner = IsValid( cppiOwner ) and cppiOwner:EntIndex() or -1
 
-        local restrictConstraint = ent.FPPRestrictConstraint or ent.FPPCanTouch
-        if not restrictConstraint then return end
+        local restrictConstraint = ent.FPPRestrictConstraint or ent.FPPCanTouch or empty
         local touchability = rawget( restrictConstraint, ply ) or ""
 
-        local constraintReasons = ent.FPPConstraintReasons or ent.FPPCanTouchWhy
-        if not constraintReasons then return end
+        local constraintReasons = ent.FPPConstraintReasons or ent.FPPCanTouchWhy or empty
         local reasons = rawget( constraintReasons, ply ) or ""
 
         table_insert( tbl, ent:EntIndex() )
