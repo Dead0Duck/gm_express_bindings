@@ -13,11 +13,11 @@ local function enable()
         local cppiOwner = ent:CPPIGetOwner()
         local owner = IsValid( cppiOwner ) and cppiOwner:EntIndex() or -1
 
-        local restrictConstraint = ent.FPPRestrictConstraint
-        local touchability = rawget( restrictConstraint and restrictConstraint or ent.FPPCanTouch, ply )
+        local restrictConstraint = ent.FPPRestrictConstraint or ent.FPPCanTouch
+        local touchability = rawget( restrictConstraint, ply ) or ""
 
-        local constraintReasons = ent.FPPConstraintReasons
-        local reasons = rawget( constraintReasons and constraintReasons or ent.FPPCanTouchWhy, ply )
+        local constraintReasons = ent.FPPConstraintReasons or ent.FPPCanTouchWhy
+        local reasons = rawget( constraintReasons, ply ) or ""
 
         table_insert( tbl, ent:EntIndex() )
         table_insert( tbl, owner )
@@ -26,12 +26,12 @@ local function enable()
     end
 
     FPP.plySendTouchData = function( ply, ents )
-        -- Technically this breaks out before <300 ents, but that's correct too
-        if not ply.Express_CanReceiveFPP then return end
-
+        -- If <300 ents, send this even if they're not ready for the Express message
         if #ents < 300 then
             return originalPlySendTouchData( ply, ents )
         end
+
+        if not ply.Express_CanReceiveFPP then return end
 
         local tbl = {}
         for i = 1, #ents do
@@ -40,11 +40,17 @@ local function enable()
 
         express.Send( "fpp_touchability_data", tbl, ply )
     end
+
+    hook.Add( "PlayerFullLoad", "Express_FPPBindings", function( ply )
+        ply.Express_CanReceiveFPP = true
+        FPP.plySendTouchData( ply, ents.GetAll() )
+    end )
 end
 
 local function disable()
     if enabled:GetBool() then return end
     FPP.plySendTouchData = originalPlySendTouchData
+    hook.Remove( "PlayerFullLoad", "Express_FPPBindings" )
 end
 
 cvars.AddChangeCallback( "express_enable_fpp", function( _, old, new )
@@ -57,9 +63,6 @@ cvars.AddChangeCallback( "express_enable_fpp", function( _, old, new )
     end
 end, "setup_teardown" )
 
-hook.Add( "PlayerFullLoad", "Express_FPPBindings", function( ply )
-    ply.Express_CanReceiveFPP = true
-end )
 
 hook.Add( "InitPostEntity", "Express_FPPBindings", function()
     if enabled:GetBool() then enable() end

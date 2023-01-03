@@ -6,7 +6,7 @@ local function enable()
     if not enabled:GetBool() then return end
 
     local entOwners = FPP.entOwners
-    local entTouchabiiity = FPP.entTouchability
+    local entTouchability = FPP.entTouchability
     local entTouchReasons = FPP.entTouchReasons
 
     express.Receive( "fpp_touchability_data", function( data )
@@ -18,8 +18,13 @@ local function enable()
             local reason = rawget( data, i + 3 )
 
             rawset( entOwners, ent, owner )
-            rawset( entTouchabiiity, ent, touchability )
-            rawset( entTouchReasons, ent, reason )
+            if touchability ~= "" then
+                rawset( entTouchability, ent, touchability )
+            end
+
+            if reason ~= "" then
+                rawset( entTouchReasons, ent, reason )
+            end
         end
     end )
 end
