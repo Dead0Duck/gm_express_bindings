@@ -50,6 +50,8 @@ end
 local function disable()
     if enabled:GetBool() then return end
     AdvDupe2.SendToClient = ogSendToClient
+
+    express.Receive( "advdupe2_receivefile", nil )
 end
 
 cvars.AddChangeCallback( "express_enable_adv2", function( _, old, new )
