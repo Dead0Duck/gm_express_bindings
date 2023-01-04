@@ -44,7 +44,7 @@ local function enable()
 
     hook.Add( "PlayerFullLoad", "Express_FPPBindings", function( ply )
         ply.Express_CanReceiveFPP = true
-        FPP.plySendTouchData( ply, ents.GetAll() )
+        FPP.recalculateCanTouch( { ply }, ents.GetAll() )
     end )
 end
 
