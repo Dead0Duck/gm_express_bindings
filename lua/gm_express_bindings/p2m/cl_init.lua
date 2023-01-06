@@ -2,7 +2,6 @@ local enabled = CreateConVar( "express_enable_p2m", "1", FCVAR_ARCHIVE + FCVAR_R
 
 local function enable()
     if not prop2mesh then return end
-    if not enabled:GetBool() then return end
 
     express.Receive( "prop2mesh_download", function( objects )
         prop2mesh.downloads = prop2mesh.downloads + #objects
@@ -17,8 +16,6 @@ end
 
 local function disable()
     if not prop2mesh then return end
-    if enabled:GetBool() then return end
-
     express.Receive( "prop2mesh_download", nil )
 end
 

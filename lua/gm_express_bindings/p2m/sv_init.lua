@@ -4,8 +4,6 @@ local originalSendDownload
 
 local function enable()
     if not prop2mesh then return end
-    if not enabled:GetBool() then return end
-
     originalSendDownload = originalSendDownload or prop2mesh.sendDownload
 
     local pendingSendDownloads = {}
@@ -37,8 +35,6 @@ end
 
 local function disable()
     if not prop2mesh then return end
-    if enabled:GetBool() then return end
-
     prop2mesh.sendDownload = originalSendDownload
 end
 

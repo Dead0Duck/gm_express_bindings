@@ -3,8 +3,6 @@ local rawset = rawset
 local enabled = CreateConVar( "express_enable_fpp", "1", { FCVAR_ARCHIVE, FCVAR_REPLICATED }, "Enable FPP Bindings" )
 
 local function enable()
-    if not enabled:GetBool() then return end
-
     local entOwners = FPP.entOwners
     local entTouchability = FPP.entTouchability
     local entTouchReasons = FPP.entTouchReasons
@@ -30,8 +28,6 @@ local function enable()
 end
 
 local function disable()
-    if enabled:GetBool() then return end
-
     express.Receive( "fpp_touchability_data", nil )
 end
 

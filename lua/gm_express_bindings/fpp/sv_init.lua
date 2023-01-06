@@ -7,7 +7,6 @@ local enabled = CreateConVar( "express_enable_fpp", "1", FCVAR_ARCHIVE + FCVAR_R
 
 local function enable()
     if not FPP then return end
-    if not enabled:GetBool() then return end
     originalPlySendTouchData = originalPlySendTouchData or FPP.plySendTouchData
 
     local function writeEntData( ply, ent, tbl )
@@ -49,7 +48,6 @@ local function enable()
 end
 
 local function disable()
-    if enabled:GetBool() then return end
     FPP.plySendTouchData = originalPlySendTouchData
     hook.Remove( "PlayerFullLoad", "Express_FPPBindings" )
 end

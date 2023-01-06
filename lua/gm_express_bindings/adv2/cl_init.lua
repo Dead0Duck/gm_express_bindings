@@ -27,7 +27,6 @@ end
 
 local function enable()
     if not AdvDupe2 then return end
-    if not enabled:GetBool() then return end
 
     originalReceiver = originalReceiver or net.Receivers["advdupe2_receivefile"]
 
@@ -74,8 +73,6 @@ local function enable()
 end
 
 local function disable()
-    if enabled:GetBool() then return end
-
     envOff()
     AdvDupe2.UploadFile = originalUploadFile
     express.Receive( "advdupe2_receivefile", nil )
