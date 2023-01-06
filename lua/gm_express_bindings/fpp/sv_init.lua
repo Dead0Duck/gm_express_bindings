@@ -65,6 +65,6 @@ cvars.AddChangeCallback( "express_enable_fpp", function( _, old, new )
 end, "setup_teardown" )
 
 
-hook.Add( "InitPostEntity", "Express_FPPBindings", function()
+hook.Add( "PostGamemodeLoaded", "Express_FPPBindings", function()
     if enabled:GetBool() then enable() end
 end )

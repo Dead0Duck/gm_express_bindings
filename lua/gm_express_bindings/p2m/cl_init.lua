@@ -27,6 +27,6 @@ cvars.AddChangeCallback( "express_enable_p2m", function( _, new )
     if new ~= 0 then return enable() end
 end, "setup_teardown" )
 
-hook.Add( "InitPostEntity", "Express_P2MBindings", function()
+hook.Add( "PostGamemodeLoaded", "Express_P2MBindings", function()
     if enabled:GetBool() then enable() end
 end )

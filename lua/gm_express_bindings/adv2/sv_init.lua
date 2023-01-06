@@ -64,6 +64,6 @@ cvars.AddChangeCallback( "express_enable_adv2", function( _, old, new )
     end
 end, "setup_teardown" )
 
-hook.Add( "InitPostEntity", "Express_Adv2Bindings", function()
+hook.Add( "PostGamemodeLoaded", "Express_Adv2Bindings", function()
     if enabled:GetBool() then enable() end
 end )
