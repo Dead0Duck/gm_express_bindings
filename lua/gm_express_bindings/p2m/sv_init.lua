@@ -20,7 +20,10 @@ local function enable()
 
             for _, download in ipairs( downloads ) do
                 local ent, crc = unpack( download )
-                table.insert( downloadObjects, { crc = crc, partData = ent.prop2mesh_partlists[crc] } )
+                local partlists = ent.prop2mesh_partlists
+                if partlists then
+                    table.insert( downloadObjects, { crc = crc, partData = partlists[crc] } )
+                end
             end
 
             express.Send( "prop2mesh_download", downloadObjects, ply )
