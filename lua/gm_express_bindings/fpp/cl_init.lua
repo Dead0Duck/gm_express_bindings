@@ -9,6 +9,7 @@ local function enable()
 
     express.Receive( "fpp_touchability_data", function( data )
         local dataCount = #data
+
         for i = 1, dataCount, 4 do
             local ent = rawget( data, i )
             local owner = rawget( data, i + 1 )
@@ -28,20 +29,15 @@ local function enable()
 end
 
 local function disable()
-    express.Receive( "fpp_touchability_data", nil )
+    express.ClearReceiver( "fpp_touchability_data" )
 end
 
-cvars.AddChangeCallback( "express_enable_fpp", function( _, old, new )
-    if new == 0 and old ~= 0 then
-        return disable()
-    end
-
-    if new ~= 0 then
-        return enable()
-    end
+cvars.AddChangeCallback( "express_enable_fpp", function( _, _, new )
+    if new == "0" then return disable() end
+    if new == "1" then return enable() end
 end, "setup_teardown" )
 
-hook.Add( "PostGamemodeLoaded", "Express_FPPBindings", function()
+ExpressBindings.waitForExpress( "Express_FPPBindings", function()
     if enabled:GetBool() then enable() end
 end )
 

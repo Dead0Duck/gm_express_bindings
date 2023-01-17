@@ -1,10 +1,11 @@
 local enabled = CreateConVar( "express_enable_p2m", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Enable Prop2Mesh Bindings" )
 
-local originalSendDownload
+ExpressBindings.P2M = ExpressBindings.P2M or {}
+local ExpressP2M = ExpressBindings.P2M
 
 local function enable()
     if not prop2mesh then return end
-    originalSendDownload = originalSendDownload or prop2mesh.sendDownload
+    ExpressP2M.originalSendDownload = ExpressP2M.originalSendDownload or prop2mesh.sendDownload
 
     local pendingSendDownloads = {}
 
@@ -20,9 +21,14 @@ local function enable()
 
             for _, download in ipairs( downloads ) do
                 local ent, crc = unpack( download )
-                local partlists = ent.prop2mesh_partlists
-                if partlists then
-                    table.insert( downloadObjects, { crc = crc, partData = partlists[crc] } )
+
+                if IsValid( ent ) then
+                    local partLists = ent.prop2mesh_partlists
+                    if partLists then
+                        table.insert( downloadObjects, { crc = crc, partData = partLists[crc] } )
+                    else
+                        ErrorNoHalt( "Prop2Mesh: Tried to send download for invalid partlist on entity " .. tostring( ent ), ent:CPPIGetOwner() )
+                    end
                 end
             end
 
@@ -38,14 +44,14 @@ end
 
 local function disable()
     if not prop2mesh then return end
-    prop2mesh.sendDownload = originalSendDownload
+    prop2mesh.sendDownload = ExpressP2M.originalSendDownload
 end
 
 cvars.AddChangeCallback( "express_enable_p2m", function( _, _, new )
-    if new == 0 then return disable() end
-    if new ~= 0 then return enable() end
+    if new == "0" then return disable() end
+    if new == "1" then return enable() end
 end, "setup_teardown" )
 
-hook.Add( "PostGamemodeLoaded", "Express_P2MBindings", function()
+ExpressBindings.waitForExpress( "Express_P2MBindings", function()
     if enabled:GetBool() then enable() end
 end )
