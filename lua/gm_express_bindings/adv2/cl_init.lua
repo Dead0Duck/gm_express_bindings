@@ -33,7 +33,10 @@ local function enable()
 
     express.Receive( "advdupe2_receivefile", function( data )
         envOn( data )
-        ExpressAdv2.originalReceiver()
+        local success, err = pcall( ExpressAdv2.originalReceiver )
+        if not success then
+            ErrorNoHalt( "Error processing received AdvDupe2 file: " .. err )
+        end
         envOff()
     end )
 

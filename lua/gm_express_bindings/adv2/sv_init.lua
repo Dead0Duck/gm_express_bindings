@@ -46,7 +46,7 @@ local function enable()
         end )
 
         if not success then
-            ErrorNoHalt( "Error with received adv2 dupe, could not load dupe:", err )
+            ErrorNoHalt( "Error with received adv2 dupe, could not load dupe: " .. err )
         end
 
         ply.AdvDupe2.Uploading = false
