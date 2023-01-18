@@ -16,6 +16,7 @@ end
 hook.Add( "ExpressLoaded", "ExpressBindings_Loader", function()
     hook.Add( "Think", "ExpressBindings_Loader", function()
         hook.Remove( "Think", "ExpressBindings_Loader" )
+        loaded = true
 
         for name, cb in pairs( ExpressBindings.waiting ) do
             local success, err = pcall( cb )
