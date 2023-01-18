@@ -1,7 +1,7 @@
 local enabled = CreateConVar( "express_enable_p2m", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Enable Prop2Mesh Bindings" )
 
 local GREEN = Color( 50, 200, 50 )
-local GREY = Color( 100, 100, 100 )
+local GREY = Color( 200, 200, 200 )
 local ORANGE = Color( 225, 100, 50 )
 local BLUE = Color( 93, 145, 240 )
 
