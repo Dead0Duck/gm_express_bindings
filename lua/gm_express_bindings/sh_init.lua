@@ -8,6 +8,7 @@ if SERVER then
     util.AddNetworkString( "express_bindings_change" )
 end
 
+local loaded = false
 function ExpressBindings.waitForExpress( name, cb )
     if loaded then
         ErrorNoHalt( "ExpressBindings.waitForExpress called after Express was loaded!" )
@@ -34,17 +35,21 @@ function ExpressBindings.RegisterModule( name, module )
                 net.WriteBool( new )
             net.Broadcast()
 
+            if not module:IsValid() then return end
+
             if new then
-                module.enable()
+                module.Enable()
             else
-                module.disable()
+                module.Disable()
             end
         end, "module_toggle" )
     end
 
     -- First load setting
     ExpressBindings.waitForExpress( name, function()
-        if cvar:GetBool() then module.enable() end
+        if cvar:GetBool() and module:IsValid() then
+            module.Enable()
+        end
     end )
 
     ExpressBindings.Modules[name] = module
@@ -70,16 +75,10 @@ if CLIENT then
         local enabled = net.ReadBool()
 
         local module = ExpressBindings.Modules[moduleName]
-        if enabled then
-            module.enable()
-        else
-            module.disable()
-        end
-    end )
-end
+        if not module:IsValid() then return end
 
-if SERVER then
-    require( "playerload" )
+        ProtectedCall( enabled and module.Enable or module.Disable )
+    end )
 end
 
 include( "sh_loader.lua" )

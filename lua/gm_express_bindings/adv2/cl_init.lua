@@ -36,9 +36,7 @@ return function( Module )
         setfenv( Module.originalReceiver, getfenv( 0 ) )
     end
 
-    function Module.enable()
-        if not AdvDupe2 then return end
-
+    function Module.Enable()
         Module.originalReceiver = Module.originalReceiver or net.Receivers["advdupe2_receivefile"]
 
         express.Receive( "advdupe2_receivefile", function( data )
@@ -113,7 +111,7 @@ return function( Module )
         end
     end
 
-    function Module.disable()
+    function Module.Disable()
         envOff()
         setfenv( Module.originalUploadFile, getfenv( 0 ) )
 

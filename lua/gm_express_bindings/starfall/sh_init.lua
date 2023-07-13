@@ -1,3 +1,4 @@
+
 AddCSLuaFile()
 
 local Module = { default = true }
@@ -10,7 +11,7 @@ else
 end
 
 function Module:IsValid()
-    return AdvDupe2 ~= nil
+    return SF ~= nil
 end
 
-ExpressBindings.RegisterModule( "adv2", Module )
+ExpressBindings.RegisterModule( "starfall", Module )

@@ -10,7 +10,7 @@ else
 end
 
 function Module:IsValid()
-    return AdvDupe2 ~= nil
+    return pac ~= nil
 end
 
-ExpressBindings.RegisterModule( "adv2", Module )
+ExpressBindings.RegisterModule( "pac3", Module )
