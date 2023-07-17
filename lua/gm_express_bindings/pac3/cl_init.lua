@@ -36,7 +36,7 @@ return function( Module )
 
             -- This will put all of the parts into the parts table
             Module.ogWearOnServer( filter )
-            pace.WearOnServer = Module.ogWearOnServer
+            pace.SendPartToServer = Module.ogSendPartToServer
 
             if #parts == 0 then return end
 
