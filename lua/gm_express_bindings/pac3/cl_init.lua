@@ -36,7 +36,9 @@ return function( Module )
 
             -- This will put all of the parts into the parts table
             Module.ogWearOnServer( filter )
-            assert( #parts > 0, "pace.WearOnServer tried to send no parts data?" )
+            pace.WearOnServer = Module.ogWearOnServer
+
+            if #parts == 0 then return end
 
             express.Send( "pac_submit", parts )
         end

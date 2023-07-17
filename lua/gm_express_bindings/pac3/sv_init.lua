@@ -1,5 +1,6 @@
 return function( Module )
     local singlePlayer = game.SinglePlayer()
+    local tickInterval = engine.TickInterval()
 
     function Module.Enable()
         local pacSubmitSpam = GetConVar( "pac_submit_spam" )
@@ -84,8 +85,13 @@ return function( Module )
                 pac.Message( "received message from ", ply, " but player is no longer valid!" )
             end
 
-            for _, part in ipairs( data ) do
-                pace.HandleReceivedData( ply, part )
+            for i, part in ipairs( data ) do
+                local delay = (i - 1) * tickInterval
+
+                timer.Simple( delay, function()
+                    if not ply:IsValid() then return end
+                    pace.HandleReceivedData( ply, part )
+                end )
             end
         end )
     end
