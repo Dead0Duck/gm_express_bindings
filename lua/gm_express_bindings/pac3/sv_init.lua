@@ -90,6 +90,8 @@ return function( Module )
 
                 timer.Simple( delay, function()
                     if not ply:IsValid() then return end
+
+                    pac.Message( "handling received part ", i, " from ", ply )
                     pace.HandleReceivedData( ply, part )
                 end )
             end
