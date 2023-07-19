@@ -1,25 +1,13 @@
 return function( Module )
     local singlePlayer = game.SinglePlayer()
-    local tickInterval = engine.TickInterval()
 
     function Module.Enable()
         local pacSubmitSpam = GetConVar( "pac_submit_spam" )
         local pacSubmitLimit = GetConVar( "pac_submit_limit" )
 
         local partsToPlayers = {}
-
-        hook.Add( "pac_SendData", "ExpressBindings_HijackSend", function( plys, part )
-            if not partsToPlayers[part] then
-                partsToPlayers[part] = {}
-            end
-
-            for _, ply in pairs( plys ) do
-                table.insert( partsToPlayers[part], ply )
-                print( "Added part: ", part, " to player: ", ply )
-            end
-
-            return false
-        end )
+        local next = next
+        local table_insert = table.insert
 
         local function sendParts()
             -- Common parts and players lists for all existing parts
@@ -29,7 +17,7 @@ return function( Module )
             while next( partsToPlayers ) ~= nil do
                 -- Select the first part to compare with
                 local firstPart = next( partsToPlayers )
-                table.insert( commonParts, firstPart )
+                table_insert( commonParts, firstPart )
                 commonPlys = partsToPlayers[firstPart]
                 partsToPlayers[firstPart] = nil
 
@@ -49,7 +37,7 @@ return function( Module )
                     -- If the part has common players, add to the common list and remove from partsToPlayers
                     if #newCommonPlayers > 0 then
                         commonPlys = newCommonPlayers
-                        table.insert( commonParts, part )
+                        table_insert( commonParts, part )
                         partsToPlayers[part] = nil
                         print( "Found common part: ", part, " for players: ", #commonPlys )
                     end
@@ -65,7 +53,20 @@ return function( Module )
             end
         end
 
-        timer.Create( "pac_submit_multi", 1.25, 0, sendParts )
+        hook.Add( "pac_SendData", "ExpressBindings_HijackSend", function( plys, part )
+            if not partsToPlayers[part] then
+                partsToPlayers[part] = {}
+            end
+
+            for _, ply in pairs( plys ) do
+                table.insert( partsToPlayers[part], ply )
+                print( "Added part: ", part, " to player: ", ply )
+            end
+
+            timer.Create( "pac_submit_multi", 0.25, 1, sendParts )
+            return false
+        end )
+
 
         express.ReceivePreDl( "pac_submit", function( _, ply, _, size )
             if size < 64 then return false end
@@ -85,15 +86,10 @@ return function( Module )
                 pac.Message( "received message from ", ply, " but player is no longer valid!" )
             end
 
-            for i, part in ipairs( data ) do
-                local delay = (i - 1) * tickInterval
+            local dataCount = #data
 
-                timer.Simple( delay, function()
-                    if not ply:IsValid() then return end
-
-                    pac.Message( "handling received part ", i, " from ", ply )
-                    pace.HandleReceivedData( ply, part )
-                end )
+            for i = 1, dataCount do
+                pace.HandleReceivedData( ply, data[i] )
             end
         end )
     end

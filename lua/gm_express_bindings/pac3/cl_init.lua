@@ -70,7 +70,8 @@ return function( Module )
     end
 
     function Module.Disable()
-        hook.Remove( "pac_SendData", "ExpressBindings_HijackSend" )
-        express.ClearReceiver( "pac_submit" )
+        pace.WearOnServer = Module.ogWearOnServer
+        pace.SendPartToServer = Module.ogSendPartToServer
+        express.ClearReceiver( "pac_submit_multi" )
     end
 end
