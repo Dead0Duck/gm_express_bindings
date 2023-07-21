@@ -58,6 +58,8 @@ return function( Module )
                 partsToPlayers[part] = {}
             end
 
+            if not istable( plys ) then plys = { plys } end
+
             for _, ply in pairs( plys ) do
                 table.insert( partsToPlayers[part], ply )
                 print( "[ExpressBindings] Added part: ", part, " to player: ", ply )
