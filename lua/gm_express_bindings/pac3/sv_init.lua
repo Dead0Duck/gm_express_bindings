@@ -27,7 +27,7 @@ return function( Module )
                     for _, player in pairs( commonPlys ) do
                         for _, p in pairs( players ) do
                             if p == player then
-                                table.insert( newCommonPlayers, p )
+                                table_insert( newCommonPlayers, p )
                             end
                         end
                     end
