@@ -1,6 +1,22 @@
 return function( Module )
     local singlePlayer = game.SinglePlayer()
 
+    local function getNewCommonPlayers( players, commonPlys )
+        local table_insert = table.insert
+        local newCommonPlayers = {}
+
+        for _, player in pairs( commonPlys ) do
+            for _, p in pairs( players ) do
+                if p == player then
+                    table_insert( newCommonPlayers, p )
+                end
+            end
+        end
+
+        return newCommonPlayers
+    end
+
+
     function Module.Enable()
         local pacSubmitSpam = GetConVar( "pac_submit_spam" )
         local pacSubmitLimit = GetConVar( "pac_submit_limit" )
@@ -23,14 +39,7 @@ return function( Module )
 
                 -- Check all other parts for common players
                 for part, players in pairs( partsToPlayers ) do
-                    local newCommonPlayers = {}
-                    for _, player in pairs( commonPlys ) do
-                        for _, p in pairs( players ) do
-                            if p == player then
-                                table_insert( newCommonPlayers, p )
-                            end
-                        end
-                    end
+                    local newCommonPlayers = getNewCommonPlayers( players, commonPlys )
 
                     -- If the part has common players, add to the common list and remove from partsToPlayers
                     if #newCommonPlayers > 0 then
