@@ -21,8 +21,6 @@ return function( Module )
                 commonPlys = partsToPlayers[firstPart]
                 partsToPlayers[firstPart] = nil
 
-                print( "[ExpressBindings] Initializing common parts with: ", firstPart, " for players: ", #commonPlys )
-
                 -- Check all other parts for common players
                 for part, players in pairs( partsToPlayers ) do
                     local newCommonPlayers = {}
@@ -39,12 +37,10 @@ return function( Module )
                         commonPlys = newCommonPlayers
                         table_insert( commonParts, part )
                         partsToPlayers[part] = nil
-                        print( "[ExpressBindings] Found common part: ", part, " for players: ", #commonPlys )
                     end
                 end
 
                 -- Send parts to the common players
-                print( "[ExpressBindings] Sending parts: ", #commonParts, " to players: ", #commonPlys )
                 express.Send( "pac_submit_multi", commonParts, commonPlys )
 
                 -- Clear the common lists for the next iteration
@@ -62,7 +58,6 @@ return function( Module )
 
             for _, ply in pairs( plys ) do
                 table.insert( partsToPlayers[part], ply )
-                print( "[ExpressBindings] Added part: ", part, " to player: ", ply )
             end
 
             timer.Create( "pac_submit_multi", 0.25, 1, sendParts )
