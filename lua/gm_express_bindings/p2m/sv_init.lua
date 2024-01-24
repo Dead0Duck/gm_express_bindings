@@ -28,7 +28,11 @@ return function( Module )
                     end
                 end
 
-                express.Send( "prop2mesh_download", downloadObjects, ply )
+                if #downloadObjects > 0 then
+                    express.Send( "prop2mesh_download", downloadObjects, ply )
+                else
+                    print( "ExpressBindings: Tried to send empty download list to " .. tostring( ply ), "(skipping)" )
+                end
             end
 
             pendingSendDownloads = {}
